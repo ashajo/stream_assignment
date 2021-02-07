@@ -7,9 +7,12 @@ import se.lexicon.vxo.model.PersonDto;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.*;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,6 +35,7 @@ public class StreamAssignment {
         List<Integer> integers = Arrays.asList(1,2,3,4,5,6,7,8,9,10);
 
         //Write code here
+        Stream.of(integers).forEach(System.out::println);
 
     }
 
@@ -43,6 +47,7 @@ public class StreamAssignment {
         long amount = 0;
 
         //Write code here
+        amount = people.stream().count();
 
         assertEquals(10000, amount);
     }
@@ -56,6 +61,8 @@ public class StreamAssignment {
         int expected = 90;
 
         //Write code here
+        amount=people.stream().filter(Person->Person.getLastName().equalsIgnoreCase("Andersson"))
+                .count();
 
         assertEquals(expected, amount);
     }
@@ -68,7 +75,9 @@ public class StreamAssignment {
         int expectedSize = 4988;
         List<Person> females = null;
 
+
         //Write code here
+        females = people.stream().filter(Person->Person.getGender()==Gender.FEMALE).collect(Collectors.toList());
 
 
         assertNotNull(females);
@@ -84,6 +93,9 @@ public class StreamAssignment {
         Set<LocalDate> dates = null;
 
         //Write code here
+        List<LocalDate> birthDates = people.stream().map(Person::getDateOfBirth)
+                .collect(Collectors.toList());
+        System.out.println(birthDates);
 
         assertNotNull(dates);
         assertTrue(dates instanceof TreeSet);
@@ -100,6 +112,9 @@ public class StreamAssignment {
         Person[] result = null;
 
         //Write code here
+        result = people.stream()
+                .filter(Person->Person.getFirstName().equalsIgnoreCase("Erik"))
+                .toArray(Person[]::new);
 
         assertNotNull(result);
         assertEquals(expectedLength, result.length);
@@ -115,6 +130,9 @@ public class StreamAssignment {
         Optional<Person> optional = null;
 
         //Write code here
+        optional=people.stream()
+                .filter(Person->Person.getPersonId()==5436)
+                .findFirst();
 
         assertNotNull(optional);
         assertTrue(optional.isPresent());
@@ -131,6 +149,8 @@ public class StreamAssignment {
         Optional<Person> optional = null;
 
         //Write code here
+        optional = people.stream()
+                .min(Comparator.comparing(Person::getDateOfBirth));
 
         assertNotNull(optional);
         assertEquals(expectedBirthDate, optional.get().getDateOfBirth());
@@ -147,6 +167,10 @@ public class StreamAssignment {
         List<PersonDto> dtoList = null;
 
         //Write code here
+        dtoList = people.stream()
+                .filter(Person->Person.getDateOfBirth().isBefore(date))
+                .map(personDto->new PersonDto(personDto.getPersonId(),personDto.getFirstName()+" "+personDto.getLastName()))
+                        .collect(Collectors.toList());
 
         assertNotNull(dtoList);
         assertEquals(expectedSize, dtoList.size());
@@ -164,6 +188,17 @@ public class StreamAssignment {
         Optional<String> optional = null;
 
         //Write code here
+        DateTimeFormatter format2 = new DateTimeFormatterBuilder()
+                .parseCaseInsensitive()
+                .appendPattern("EEEE dd MMMM YYYY")
+                .toFormatter(Locale.ENGLISH);
+
+        optional = Optional.of(people.stream()
+                .filter(Person -> Person.getPersonId() == 5914)
+                .findFirst()
+                .get().getDateOfBirth()
+                .format(format2)
+                .toUpperCase(Locale.ROOT));
 
         assertNotNull(optional);
         assertTrue(optional.isPresent());
@@ -182,6 +217,8 @@ public class StreamAssignment {
         double averageAge = 0;
 
         //Write code here
+        averageAge = people.stream()
+                .collect(Collectors.averagingInt(personToAge));
 
         assertTrue(averageAge > 0);
         assertEquals(expected, averageAge, .01);
@@ -197,6 +234,14 @@ public class StreamAssignment {
         String[] result = null;
 
         //Write code here
+        result = people.stream()
+                .filter(Person -> Person.getFirstName()
+                 .equalsIgnoreCase(new StringBuilder(Person.getFirstName())
+                 .reverse().toString()))
+                .map(Person::getFirstName)
+                .distinct()
+                .sorted()
+                .toArray(String[]::new);
 
         assertNotNull(result);
         assertArrayEquals(expected, result);
@@ -211,6 +256,9 @@ public class StreamAssignment {
         Map<String, List<Person>> personMap = null;
 
         //Write code here
+        personMap = people.stream()
+                .collect(Collectors.groupingBy(Person::getLastName));
+
 
         assertNotNull(personMap);
         assertEquals(expectedSize, personMap.size());
